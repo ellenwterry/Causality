@@ -33,7 +33,7 @@ knitr::kable(cor(mAd), caption = "Correlations") %>%
 
 ```
 
-As mentioned in the intro, graphing causality is an iterative process. So, here's a typical first pass: 
+As mentioned in the intro, graphing causality is an iterative process. So, here's a typical **first** pass: 
 
 ```{r, message=F, warning=F, fig.width=4, fig.height=3, fig.align="center", eval=T, echo=T}
 
@@ -301,9 +301,9 @@ These relationships were easy to see, so we didn't have to go through a detailed
 
 It isn't. And most data relationships are really complex, multilevel, and ambiguous with a WIDE range of causes in long chains. The DAGs can get really complex, resembling the aftermath of a Robinhood battle. 
 
-It's often that *one* causal relationship that is the key: the one with really small correlations, the one that machine learning platforms eliminate with L1 and L2 regularization, the one that analysts ignore becuase the data is ambiguous or sparse and hard to obtain, or the one doesn't fit into their cool datalake and dashborads, the one that isn't captured by the ERP and accounting system... 
+It's often that *one* causal relationship that is the key: the one with really small correlations, the one that machine learning platforms eliminate with L1 regularization and dimension reduction, the one that analysts ignore becuase the data are ambiguous or sparse and hard to obtain, or the one doesn't fit into their cool datalakes and dashborads, the one that isn't captured by the ERP and accounting system... 
 
-Those sneaky little relationships are key, because they might be the drivers that reveal a path to industry dominance. Sam Walton knew when he rented planes to fly over parking lots. Bill Gates and Jamie Dimon know that too. And if you work for them, they'll ask you about it. If you give them an  answer that goes beyond dashboards, and hints at an understanding of causation and business drivers, that reveals an intellectual curiosity that drives you... then you just opened the door. 
+Those sneaky little relationships are key, because they might be the drivers that reveal a path to industry dominance. Sam Walton knew when he rented planes to fly over parking lots. Bill Gates and Jamie Dimon know that too. And if you work for them, they'll ask you about it. If you give them an answer that goes beyond dashboards, and hints at an understanding of causation and business drivers, that reveals an intellectual curiosity that drives you... then you just opened the door. 
 
 You have the tools: You can explore and find drivers and outcomes using EDA and modeling. You can project scenarios with sparse and missing data. You can integrate ambiguous opinions into multilevel scenarios using Bayesian analysis. And you can find and measure drivers that **cause** business outcomes. But your best tool is your understanding and intuition and the curiosity that drives you - not the technology. 
 

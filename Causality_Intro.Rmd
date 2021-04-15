@@ -26,9 +26,9 @@ set.seed(1118)
 ```
 
 ## Causaility
-We use explanatory models to quantitatively describe the outcomes of business activity. Analysts seek insight into future performance for planning, while assurance professionals seek explanations for historic performance - but the models are the same.
+Analysts seek insight into future performance for planning, while assurance professionals seek explanations for historic performance - but the models are the same. We use explanatory models to quantitatively describe the relationships between business drivers and business outcomes. The magnitude and direction of this relationship is described in the *effects*, or *coefficients* of our models. More importantly, the effects give us a starting point for **understanding** this relationship between drivers and outcomes, which gives us the ability to forecast  dynamic future environments. Will an increase in gas prices result increased demand for solar panels? Are other factors that might confound the association? 
 
-Inevitably, we arrive at the question of causation. There may be a strong correlation between a business driver and outcome, but does the driver **cause** the outcome? If not, we can't manage it to affect future performance, nor use it to validate past performance. There may be a strong correlation between Nicholas Cage films and business activity, but will getting Nicholas film contracts increase your clients revenues? 
+Inevitably, we arrive at the question of causation. There may be a strong correlation between a business driver and outcome, but does the driver **cause** the outcome? If not, we can't manage the effect in future performance, nor use it to validate past performance. 
 
 Causation often seems like an ambiguous question *to begin with*. Does an increase in credit card accounts cause an increase in Amazon sales? Does a shortage in steel cause an decrease in automobile margins? These may seem like hard questions to answer, but if you're an assurance professional, you'll write *"margin decrease is explained by..."* in your audit report. And if you're an analyst you'll recommend *"adding resources to deal with increasing revenues due to..."* So, we need to understand how these statements can be supported.
 
@@ -36,9 +36,7 @@ The process for establishing causation is two-step:
 
 1. We model causal relationships using a structured DAG *(Directed Acyclic Graph)*. This model can be *communicated* with a freehand drawing - but it is a structured, rational analysis *(your Pearl text does an excellent job of presenting DAGs in Chapter 2)*.
 
-2. We then test and confirm these relationships and refine our model - this is an iterative process. The tests measure outcomes as distributions, conditioned on the dimension values. 
-
-Simply put, the relationship can be structured in a DAG model *(as chains, forks and/or colliders)*, *AND* $P(outcome|X = x_1)<>P(outcome |X = x_2)$, then it's a causal relationship. This is an iterative process, beginning with ambiguous, but rational, beliefs - gradually disambiguating and quantifying until you've reached conclusion. Let's work through an example.
+2. We then test and confirm these relationships and refine our model. Restated, if the relationship can be structured in a DAG model *(as chains, forks and/or colliders)*, *AND* $P(outcome|X = x_1)<>P(outcome |X = x_2)$, then it's a causal relationship. This is an iterative process, beginning with ambiguous, but rational, beliefs - gradually disambiguating, deconfounding and quantifying until you've reached a belief. Let's work through an example.
 
 
 ### Data
@@ -63,17 +61,17 @@ Plant -> Training -> Production
 plot(g1)
 
 ```
-The DAG structure above, when combined with data, enables us to predict quantitatively the results of interventions without actually performing them *(Pearl pg 35)*. 
+The DAG structure above, when combined with data, enables us to predict quantitatively the results of **interventions** without actually performing them *(Pearl pg 35)*. 
 
 > Intervention is often expensive, and dangerous *(e.g., giving a vaccine to people)*. In most business scenarios, we're not worried about people dying, but we do worry about other costs *(in this scenario, purchasing, or moving production machines)*. 
 
 In this exercise, we want to know how machines and training will affect production *without* intervention, so we estimate based on observation. 
 
-An intervention is **doing** something  *(Pearl's "do" calculus)*, which often has a significant **effect**. Determining cause involves quantification of this **effect** through **Do Calculus**, which compares probability across intervention *do* conditions, or states - i.e., *(using integration - i.e., calculus)*. Fortunately, Bayesian modeling provides a valid method for measuring effects across multilevel conditions.
+An intervention is **doing** something  *(Pearl's "do calculus")*, which often has a significant **effect**. Determining cause involves quantification of this **effect** through **Do Calculus**, which compares probability across interventions *do* conditions, or states - i.e., *(using integration - i.e., calculus)*. Fortunately, Bayesian modeling provides a valid method for measuring effects across multilevel conditions *(Pearl began his research with Bayesian networks)*.
 
-So, lets get started. We'll create data to reflect the 2 level graph above. We're building a model that can predict production for a given labor pool of hours. Beyond labor hours, production is affected by:  
+So, lets get started with something really simple and known so we can get our heads around it. We'll create data to reflect the 2 level graph above. We're building a model that can predict production for a given labor pool of hours. Beyond labor hours, production is affected by:  
 
-> **Plant** Different plants have different inefficiencies. **PEffect** *(which we don't usually know, but control for here)*, is the quantitative effect of those differences. Why? Different plants have different layouts, space, machine mix *(which we will measure separately)*, labor scheduling, decision-making, and overall culture. This goes beyond manufacturing - you will find the same effects and drivers in service industries too. I once did an analysis at GE that found our highest labor cost facility *(France)* was actually our most profitable because of culture *(they were very diligent about quoting, scheduling, and maintenance)*. Culture, in all it's ambiguity, makes a big difference and not considering it, in this context, would be incompetent.  
+> **Plant** Different plants have different efficiencies. **PEffect** *(which we don't usually know, but control for here)*, is the quantitative effect of those differences. Why? Different plants have different layouts, space, machine mix *(which we will measure separately)*, labor scheduling, decision-making, and overall culture *(these are called exogenous factors)*. This goes beyond manufacturing - you will find the same effects and drivers in service industries too. I once did an analysis at GE that found our highest labor cost facility *(France)* was actually our most profitable because of culture *(they were very diligent about quoting, scheduling, and maintenance)*. Culture, in all it's ambiguity, makes a big difference and not considering it, in this context, would be incompetent.  
 
 > **Machine Type** The **MEffect**  measures the effect of different machine types - i.e.,  given labor input in hours, different machines will produce different outputs. Note that different plants have different machine types *(based on management decisions and budget)*. Normally, you wouldn't have only one instance of a machine type in a plant, but we're trying to keep is simple so you can see how the analysis works. But just FYI, machines of the same type will vary based on maintenance and operators, so you often have to go down to the individual machine ID, and also account for the interaction effects of labor skill and experience, which brings up Training.
 
@@ -132,7 +130,7 @@ knitr::kable(Metrics, caption = "Data Summary") %>%
 ```
 And let's check correlations: 
 
->Something to keep in mind: in many scenarios where business DRIVERS are being analyzed, correlations can be quantitatively small - really small - especially in cases where there is a long time lag *(e.g., steel prices => automobile profit margins)*. Just becuase they're small doesn't mean they're unimportant - in fact, they may be the key to industry dominance and profit margins. Use your mind, not your spreadsheet.
+>Something to keep in mind: in many scenarios where business DRIVERS are being analyzed, correlations can be quantitatively small - really small - especially in cases where there is a long time lag *(e.g., gas prices -> demand for solar panels)*. Just becuase they're small doesn't mean they're unimportant - in fact, they may be the key to industry dominance and profit margins. Use your mind, not your spreadsheet.
 
 ```{r, message=F, warning=F, fig.width=4, fig.height=3, fig.align="center", eval=T, echo=T}
 
@@ -147,7 +145,7 @@ knitr::kable(cData, caption = "Correlation") %>%
 
 ### Initial Models
 
-Now, we'll run build some lmer models *(and add lm models in the plot)* for baseline:
+Now, we'll run build some lmer models *(and add lm models in the plot)*, just for a baseline:
 
 ```{r, message=F, warning=F, fig.width=8, fig.height=3, fig.align="center", eval=T, echo=T}
 
@@ -189,7 +187,7 @@ p
 
 
 ```
-Note above, lm and lmer produce projections only for dimensions with existing data *(so, in this case, Plant 2 does not have a machine type 1 or 4, yet Plant 2 is the only plant that executed a training program. This confounds counterfactuals, or projections, like: "If Plant 1 adds training, how will that impact Production?")*. So, machine learning *(and Homer Simpson dashboards)* are not going to provide the answers you seek. STOP looking there!
+Note above, the models produce projections only for dimensions with existing data *(so, in this case, Plant 2 does not have a machine type 1 or 4, yet Plant 2 is the only plant that executed a training program. This confounds counterfactuals, or projections, like: "If Plant 1 adds training, how will that impact Production?")*. So, machine learning *(and Homer Simpson dashboards)* are not going to provide the answers you seek. STOP looking there!
 
 
 ### Bayesian Model
@@ -315,7 +313,9 @@ p
 ```
 *(above, showing regression models across plants and training on margins and machines in color)*
 
-This is one of the strengths of Bayesian Modleing  - the ability to create effects for *(posterior)* scenarios where data *(likelihood)* does not exist!!  *(note that each plant has a projection for ALL machines)* BIG DEAL! Now that we have a roungh estimated of the effects by level, we can build a counterfactual, or projection, for effects where machines, or training don't exist. Back to the question: "What would be the effect of training on Plant 1". Plant 2, where the training occurs, only has machines 2 and 3?
+This is one of the strengths of Bayesian Modleing  - the ability to create effects for *(posterior)* scenarios where data *(likelihood)* does not exist!!  *(note that each plant has a projection for ALL machines)* BIG DEAL! 
+
+This gives us effects by group *(which is based on the group covariance)*, so it let's us control, *(or hold factors constant)*. That's all we really need to determine causality. But that's not the end of the work. We often want to know what the forecast *(counterfactual)* looks like *(the "what if")*. Back to the question: "What would be the effect of training on Plant 1". Plant 2?"
 
 ### Bringing it together with the DAG
 
@@ -326,7 +326,7 @@ This is one of the strengths of Bayesian Modleing  - the ability to create effec
 * Plant and Machine are dependent
 * Plant and Training are dependent
 * Machine and Training are likely dependent
-* Machine and Training are independent, conditional on Plant
+* Machine and Training are independent, conditional on Plant *(if we filter plant data on Plant = 1, Machine will still vary, independent of training, due to exogenous factors - e.g., skill, culture, operator competence)*
 
 **Chain Rules**
 
@@ -345,11 +345,11 @@ This is one of the strengths of Bayesian Modleing  - the ability to create effec
 * Training and Machine are independent
 * Training and Machine are dependent, conditional on Production
 
-So, that's our rules, now all we need to do is measure $P(before intervention | condition) <> P(after intervention | condition)$. How much difference counts as causal? Well that depends on your judgment! If you're measuring production like this example, the effect is obvious. But if you're measuring an ambiguous economic driver with a small impact on industry demand, or stock price, you might need to tune your significance threshold.  
+The key here for determining causality is: Training and Machine are dependent, conditional on Production. In other words, if I hold Production constant, then training will determine machine and vice-versa. Stated another way, if I hold machine constant and change training, we would expect production to vary. That's what we're trying to prove.  
 
-This exercise and the Stan model has already given us the answer, so you can already make credible inferences about causality.
+So we need to do is measure $P(before_intervention | condition) <> P(after_intervention | condition)$. How much difference counts as causal? Well that depends on your judgment! If you're measuring production like this example, the effect is obvious. But if you're measuring an ambiguous economic driver with a small impact on industry demand, or stock price, you might need to tune your significance threshold. 
 
-First, let's look at the **Fork**. Comparing Training *(margins)*across machines and plants:
+First, let's look at probability from a high level, just to get an understanding of the distributions:
 
 ```{r, message=F, warning=F, fig.width=4, fig.height=3, fig.align="center", eval=T, echo=T}
 
@@ -361,15 +361,11 @@ p3
 
 
 ```
-So there's visual evidence of a training effect, but since it's all in Plant 2, how much of that is plant vs. training assuming machine types can be projected across plants?  
-
-We can hold MachineType == 3 and compare Training==0 to Training==1 *(remember this includes all plant with machine 3, so plant effect has to be controlled for, but just for a start)*: 
-
-### Do-Calculus
-
-Our **Do-Calculus** computation compares probability *(integration across densities)* for 2 conditions *(states)* - training and no training:
+One way to view the $P(before_intervention | condition) <> P(after_intervention | condition)$ is to  hold MachineType == 3 and compare Training==0 to Training==1 across the data. Our **Do-Calculus** *(ch 3 Pearl)* computation compares probability *(integration across densities)* for 2 conditions *(states)* - training and no training controlling for machine:
 
 ```{r, message=F, warning=F, fig.width=5, fig.height=3, fig.align="center", eval=T, echo=T}
+
+# this just pulls the lower and upper limit of the data
 
 ll = round(if_else(
   mean(filter(Data, MachineType == 3, Training==0)$Production) >
@@ -384,6 +380,7 @@ ul = round(if_else(
   max(filter(Data, MachineType == 3, Training==1)$Production)),0)
 
 
+# then we estimate the probability using a r function to integrate and approximated density function. 
 
 P2 = integrate(approxfun(density(filter(Data, MachineType == 3, Training==0)$Production)), 
                lower = ll, 
@@ -391,18 +388,18 @@ P2 = integrate(approxfun(density(filter(Data, MachineType == 3, Training==0)$Pro
                subdivisions=200)$value
 
 P3 = integrate(approxfun(density(filter(Data, MachineType == 3, Training==1)$Production)), 
-               lower = 2000, 
-               upper = max(filter(Data, MachineType == 3)$Production), 
+               lower = ll, 
+               upper = ul, 
                subdivisions=200)$value
 
 P3 - P2
 
 ```
-So the difference here is ~ 20%, which is significant by any criteria. So, we know there's a causal effect here. 
+So the difference here is > 20%, which is significant by any criteria. So, we know there's a causal effect here, we just need to quantify the training effects from  machine and plant effects. We can then use those effects to **simulate an intervention**,  - i.e., create a counterfactual.
 
 ### Simulations
 
-Another good way to analyze causal scenarios is to run a simulations *(since we have estimated effects from Stan, we can generate simulations all day)* . First, let's look at actual data for Machine 2 in Plant 1 as a baseline:
+A good way to analyze causal scenarios is to model the effects and then create simulations *(we already have estimated effects from Stan)*. First, let's look at actual data for Machine 2 in Plant 1 as a levelset:
 
 ```{r, message=F, warning=F, fig.width=3, fig.height=3, fig.align="center", eval=T, echo=T}
 
@@ -413,7 +410,8 @@ pSim = ggplot(Plant1Machine2, aes(x = Production)) +
 pSim
 
 ```
-Now let's simulate this scenario:
+So that's the actual data for Machine 2 in Plant 1 - now let's **simulate** the same scenario using stan effects *(just to check ourselves)*:
+
 ```{r, message=F, warning=F, fig.width=3, fig.height=3, fig.align="center", eval=T, echo=T}
 
 
@@ -429,9 +427,7 @@ pSim
 
 
 ```
-*(showing that the simulation distribution is the same and the actual, above)*
-
-NOW, let's use the Stan effects to simulate the same scenario **WITH** training:
+OK, this looks good. So, now let's use the Stan effects to simulate the same scenario **WITH** training:
 
 ```{r, message=F, warning=F, fig.width=3, fig.height=3, fig.align="center", eval=T, echo=T}
 
@@ -441,9 +437,10 @@ pSim
 
 
 ```
-As you can see, there is a marked effect - an increase in produciton.
+And estimating the improvement for training in machine 2 during the production period:
 
----
+```{r, message=F, warning=F, fig.width=3, fig.height=3, fig.align="center", eval=T, echo=T}
 
-We'll work through some more exercises in the next document.
+mean(SimP1M2T1$Production) - mean(SimP1M2T0$Production)
 
+```
